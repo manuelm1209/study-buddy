@@ -71,7 +71,11 @@ thread_id = "thread_OXNU4QTfQt5XVNzGogD4JReV"
 
 # # === Step 3. Create a Thread
 message = "What is mining?"
-message = client.beta.threads.messages.create(thread_id=thread_id, role="user", content=message)
+message = client.beta.threads.messages.create(
+    thread_id=thread_id,
+    role="user",
+    content=message
+)
 
 # thread = client.beta.threads.create(
 #     messages=[{
