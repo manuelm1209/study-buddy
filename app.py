@@ -36,8 +36,9 @@ st.set_page_config(page_title="Study Buddy - Chat and Learn", page_icon=":books:
 
 # ==== Function definitions etc =====
 def upload_to_openai(filepath):
-    with open(filepath, "rb") as file:
-        response = client.files.create(file=file.read(), purpose="assistants")
+    response = client.files.create(
+        file=open(filepath, "rb"), purpose="assistants"
+        )
     return response.id
 
 
@@ -46,35 +47,12 @@ file_uploaded = st.sidebar.file_uploader(
     "Upload a file to be transformed into embeddings", key="file_upload"
 )
 
-#! Code from tutorial
-# # Upload file button - store the file ID
-# if st.sidebar.button("Upload File"):
-#     if file_uploaded:
-#         with open(f"{file_uploaded.name}", "wb") as f:
-#             f.write(file_uploaded.getbuffer())
-#         another_file_id = upload_to_openai(f"{file_uploaded.name}")
-#         st.session_state.file_id_list.append(another_file_id)
-#         st.sidebar.write(f"File ID:: {another_file_id}")
-
-# # Display those file ids
-# if st.session_state.file_id_list:
-#     st.sidebar.write("Uploaded File IDs:")
-#     for file_id in st.session_state.file_id_list:
-#         st.sidebar.write(file_id)
-#         # Associate each file id with the current assistant
-#         assistant_file = client.beta.vector_stores.files.create(
-#             vector_store_id=vector_store_id, file_id=file_id
-#         )
- 
- 
-#! My code       
 # Upload file button - store the file ID
 if st.sidebar.button("Upload File"):
     if file_uploaded:
-        filepath = f"./{file_uploaded.name}"
-        with open(filepath, "wb") as f:
+        with open(f"{file_uploaded.name}", "wb") as f:
             f.write(file_uploaded.getbuffer())
-        another_file_id = upload_to_openai(filepath)
+        another_file_id = upload_to_openai(f"{file_uploaded.name}")
         st.session_state.file_id_list.append(another_file_id)
         st.sidebar.write(f"File ID:: {another_file_id}")
 
@@ -84,10 +62,10 @@ if st.session_state.file_id_list:
     for file_id in st.session_state.file_id_list:
         st.sidebar.write(file_id)
         # Associate each file id with the current assistant
-        print(f"\nFile_ID:::>>> {file_id}")
-        assistant_file = client.beta.vector_stores.files.create_and_poll(
+        assistant_file = client.beta.vector_stores.files.create(
             vector_store_id=vector_store_id, file_id=file_id
         )
+        
 
 # Button to initiate the chat session
 if st.sidebar.button("Start Chatting..."):
@@ -127,7 +105,8 @@ def process_message_with_citations(message):
                 "filename": "cryptocurrency.pdf"
             }  # This should be replaced with actual file retrieval
             citations.append(
-                f'[{index + 1}] {file_citation.quote} from {cited_file["filename"]}'
+                # f'[{index + 1}] {file_citation.quote} from {cited_file["filename"]}'
+                f'[{index + 1}] {file_citation} from {cited_file["filename"]}'
             )
         elif file_path := getattr(annotation, "file_path", None):
             # Placeholder for file download citation
@@ -151,7 +130,7 @@ st.write("Learn fast by chatting with your documents")
 # Check sessions
 if st.session_state.start_chat:
     if "openai_model" not in st.session_state:
-        st.session_state.openai_model = "gpt-4o-mini"
+        st.session_state.openai_model = "gpt-4-1106-preview"
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
